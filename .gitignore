@@ -24,6 +24,11 @@
 .DS_Store
 *.pem
 
+# large video files — host these externally (see DEPLOYMENT_GUIDE.md)
+/public/videos/*.mp4
+/public/videos/*.mov
+/public/videos/*.webm
+
 # debug
 npm-debug.log*
 yarn-debug.log*

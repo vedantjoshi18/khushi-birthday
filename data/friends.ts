@@ -1,0 +1,28 @@
+export const friends = [
+  { id: 1,  name: "Mummy",      relation: "Birthday Video Message", videoSrc: "/videos/Khushi mom.mp4",  thumbnail: "/thumbnails/mummy.jpg",      bgAccent: "#A855F7" },
+  { id: 2,  name: "Papa",       relation: "Birthday Video Message", videoSrc: "/videos/papa.mp4",         thumbnail: "/thumbnails/papa.jpg",       bgAccent: "#EC4899" },
+  { id: 3,  name: "Bhai",       relation: "Birthday Video Message", videoSrc: "/videos/bhai.mp4",         thumbnail: "/thumbnails/bhai.jpg",       bgAccent: "#8B5CF6" },
+  { id: 4,  name: "Kanchan Di", relation: "Birthday Video Message", videoSrc: "/videos/kanchan-di.mp4",   thumbnail: "/thumbnails/kanchan-di.jpg", bgAccent: "#F472B6" },
+  { id: 5,  name: "Jiya",       relation: "Birthday Video Message", videoSrc: "/videos/jiya.mp4",         thumbnail: "/thumbnails/jiya.jpg",       bgAccent: "#A855F7" },
+  { id: 6,  name: "Rani",       relation: "Birthday Video Message", videoSrc: "/videos/rani.mov",         thumbnail: "/thumbnails/rani.jpg",       bgAccent: "#EC4899" },
+  { id: 7,  name: "Mahi",       relation: "Birthday Video Message", videoSrc: "/videos/mahi.mp4",         thumbnail: "/thumbnails/mahi.jpg",       bgAccent: "#8B5CF6" },
+  { id: 8,  name: "Nenu",       relation: "Birthday Video Message", videoSrc: "/videos/nenu.mp4",         thumbnail: "/thumbnails/nenu.jpg",       bgAccent: "#F472B6" },
+  { id: 9,  name: "Divyansh",   relation: "Birthday Video Message", videoSrc: "/videos/divyansh.mp4",     thumbnail: "/thumbnails/divyansh.jpg",   bgAccent: "#A855F7" },
+  { id: 10, name: "Krishni Di", relation: "Birthday Video Message", videoSrc: "/videos/krishni-di.mp4",   thumbnail: "/thumbnails/krishni-di.jpg", bgAccent: "#EC4899" },
+  { id: 11, name: "Anchal",     relation: "Birthday Video Message", videoSrc: "/videos/anchal.mp4",       thumbnail: "/thumbnails/anchal.jpg",     bgAccent: "#8B5CF6" },
+  { id: 12, name: "Nidhi",      relation: "Birthday Video Message", videoSrc: "/videos/Nidhi.mp4",        thumbnail: "/thumbnails/nidhi.jpg",      bgAccent: "#F472B6" },
+  { id: 13, name: "Kabir",      relation: "Birthday Video Message", videoSrc: "/videos/Kabeer.mp4",       thumbnail: "/thumbnails/kabir.jpg",      bgAccent: "#A855F7" },
+  { id: 14, name: "Moksh",      relation: "Birthday Video Message", videoSrc: "/videos/Moksh.mp4",        thumbnail: "/thumbnails/moksh.jpg",      bgAccent: "#EC4899" },
+  { id: 15, name: "Aryan",      relation: "Birthday Video Message", videoSrc: "/videos/Aryan.mp4",        thumbnail: "/thumbnails/aryan.jpg",      bgAccent: "#8B5CF6" },
+  { id: 16, name: "Vanshika",   relation: "Birthday Video Message", videoSrc: "/videos/vanshika.mp4",     thumbnail: "/thumbnails/vanshika.jpg",   bgAccent: "#F472B6" },
+  { id: 17, name: "Yashvi",     relation: "Birthday Video Message", videoSrc: "/videos/yashvi.mp4",       thumbnail: "/thumbnails/yashvi.jpg",     bgAccent: "#A855F7" },
+  { id: 18, name: "Vedant",     relation: "Birthday Video Message", videoSrc: "/videos/vedant.mp4",       thumbnail: "/thumbnails/vedant.jpg",     bgAccent: "#EC4899" },
+  { id: 19, name: "Khushi",     relation: "Birthday Video Message", videoSrc: "/videos/khushi.mp4",       thumbnail: "/thumbnails/khushi.jpg",     bgAccent: "#8B5CF6" },
+  { id: 20, name: "Vidhi",      relation: "Birthday Video Message", videoSrc: "/videos/vidhi.mp4",        thumbnail: "/thumbnails/vidhi.jpg",      bgAccent: "#F472B6" },
+  { id: 21, name: "Sam Di",     relation: "Birthday Video Message", videoSrc: "/videos/Samrath di.mp4",   thumbnail: "/thumbnails/sam-di.jpg",     bgAccent: "#A855F7" },
+  { id: 22, name: "Manu",       relation: "Birthday Video Message", videoSrc: "/videos/manu.mp4",         thumbnail: "/thumbnails/manu.jpg",       bgAccent: "#EC4899" },
+  { id: 23, name: "Harman",     relation: "Birthday Video Message", videoSrc: "/videos/harman.mp4",       thumbnail: "/thumbnails/harman.jpg",     bgAccent: "#8B5CF6" },
+  { id: 24, name: "Priyasha",   relation: "Birthday Video Message", videoSrc: "/videos/priyasha.mp4",     thumbnail: "/thumbnails/priyasha.jpg",   bgAccent: "#F472B6" },
+] as const;
+
+export type FriendEntry = (typeof friends)[number];

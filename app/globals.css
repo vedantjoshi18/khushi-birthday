@@ -1,26 +1,96 @@
+@config "../tailwind.config.js";
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Editorial design tokens */
+  --cream:   #f5f0e8;
+  --ink:     #1a1a1a;
+  --muted:   #888888;
+  --ghost:   #cccccc;
+  --accent:  #1a1a1a;
+  --accent2: #444444;
+  --border:  rgba(0, 0, 0, 0.08);
+
+  /* Legacy aliases */
+  --background: #f5f0e8;
+  --foreground: #1a1a1a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans:     var(--font-inter);
+  --font-jakarta:  var(--font-jakarta);
+  --font-playfair: var(--font-playfair);
+  --font-garamond: var(--font-garamond);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-garamond), Georgia, serif;
+  overflow-x: hidden;
 }
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Font utility classes */
+.font-playfair { font-family: var(--font-playfair), Georgia, serif; }
+.font-garamond { font-family: var(--font-garamond), Georgia, serif; }
+.font-jakarta  { font-family: var(--font-jakarta), sans-serif; }
+
+/* Gradient text animation */
+.animate-gradient {
+  animation: gradientShift 6s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%,
+  100% { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+}
+
+/* Seamless marquee scroll */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Polaroid card style */
+.polaroid {
+  background: #fffef8;
+  padding: 10px 10px 36px 10px;
+  border-radius: 2px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ece6db;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c8b9a6;
+  border-radius: 999px;
+}
+

@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Khushi Birthday Web App
 
-## Getting Started
+A Next.js 14 + React + TypeScript birthday site with violet glassmorphism visuals, smooth scroll, interactive 3D background, Spotify player, video messages, and story sections.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Next.js 14 (App Router)
+- React 18 + TypeScript
+- Tailwind CSS
+- Framer Motion
+- Lenis smooth scroll
+- Three.js + React Three Fiber + postprocessing
+- GSAP ScrollTrigger
+- Spotify Web Playback SDK + Spotify Web API (PKCE)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Run
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Install dependencies:
+	```bash
+	npm install
+	```
+2. Create `.env.local` from `.env.local.example`
+3. Add your Spotify Client ID in `.env.local`
+4. Start dev server:
+	```bash
+	npm run dev
+	```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Spotify Setup Guide (PKCE, no backend)
 
-## Learn More
+1. Open https://developer.spotify.com/dashboard
+2. Create an app
+3. Set Redirect URI to: `http://localhost:3000/callback`
+4. Enable **Web Playback SDK** in app settings
+5. Copy Client ID to `.env.local` as `NEXT_PUBLIC_SPOTIFY_CLIENT_ID`
+6. Use a Spotify Premium account for playback support
 
-To learn more about Next.js, take a look at the following resources:
+## Content Management
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Photos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Put image files in `public/photos/`
+- Update photo names in `components/sections/Hero.tsx` (`photoFiles` array)
 
-## Deploy on Vercel
+### Videos + Friend Messages
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Put videos in `public/videos/`
+- Put thumbnails in `public/thumbnails/`
+- Edit friend entries in `data/friends.ts`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Structure
+
+- `app/layout.tsx` → global shell and fonts
+- `components/ui/AppShell.tsx` → Lenis, navbar, cursor, background layer
+- `components/three/Background.tsx` → particle + blob 3D scene
+- `components/sections/*` → all page sections
+- `components/spotify/*` → auth, provider, controls, search, list
+- `app/callback/page.tsx` → Spotify PKCE callback exchange
+
+## Notes
+
+- Three.js particle count auto-reduces on mobile
+- Custom cursor is hidden on touch devices
+- Sections are stacked for scroll-only navigation
+- Spotify section includes loading skeleton and error boundary fallback

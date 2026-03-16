@@ -1,0 +1,13 @@
+- [x] Verify that the copilot-instructions.md file in the .github directory is created.
+- [x] Clarify project requirements.
+- [x] Scaffold the project.
+- [x] Customize the project.
+- [x] Install required extensions (none required by setup info).
+- [x] Compile the project.
+- [x] Create and run task (skipped: no dedicated VS Code task required for this setup).
+- [ ] Launch the project (pending user confirmation for debug mode).
+- [x] Ensure documentation is complete.
+
+- Work through each checklist item systematically.
+- Keep communication concise and focused.
+- Follow development best practices.
