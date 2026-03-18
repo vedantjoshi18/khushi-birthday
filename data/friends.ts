@@ -1,6 +1,7 @@
 export const friends = [
   { id: 1,  name: "Mummy",      relation: "Birthday Video Message", videoSrc: "/videos/Khushi mom.mp4",  thumbnail: "/thumbnails/mummy.jpg",      bgAccent: "#A855F7" },
   { id: 2,  name: "Papa",       relation: "Birthday Video Message", videoSrc: "/videos/papa.mp4",         thumbnail: "/thumbnails/papa.jpg",       bgAccent: "#EC4899" },
+  { id: 25, name: "Cutie ki mummy aur behen", relation: "Birthday Video Message", videoSrc: "/videos/cutie ki mummy aur behen .mp4", thumbnail: "/thumbnails/cutie-ki-mummy-aur-behen.jpg", bgAccent: "#A855F7" },
   { id: 3,  name: "Bhai",       relation: "Birthday Video Message", videoSrc: "/videos/bhai.mp4",         thumbnail: "/thumbnails/bhai.jpg",       bgAccent: "#8B5CF6" },
   { id: 4,  name: "Kanchan Di", relation: "Birthday Video Message", videoSrc: "/videos/kanchan-di.mp4",   thumbnail: "/thumbnails/kanchan-di.jpg", bgAccent: "#F472B6" },
   { id: 5,  name: "Jiya",       relation: "Birthday Video Message", videoSrc: "/videos/jiya.mp4",         thumbnail: "/thumbnails/jiya.jpg",       bgAccent: "#A855F7" },

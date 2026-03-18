@@ -66,6 +66,10 @@ function PlayerInner() {
   const [removedSongUndo, setRemovedSongUndo] = useState<RemovedSongUndo | null>(null);
   const undoTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
 
+  const openFullPlayer = () => {
+    document.getElementById("music")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const currentSong = useMemo(() => {
     if (!playback.track) return null;
     return {
@@ -461,7 +465,7 @@ function PlayerInner() {
               <p className="truncate text-sm font-semibold text-stone-800">{playback.track?.name || "Not playing"}</p>
               <p className="truncate text-xs text-stone-500">{playback.track?.artists.map((artist) => artist.name).join(", ") || "Spotify"}</p>
             </div>
-            <button onClick={connect} className="rounded-lg bg-ink px-3 py-2 text-xs text-white">
+            <button onClick={openFullPlayer} className="rounded-lg bg-ink px-3 py-2 text-xs text-white">
               Open
             </button>
           </div>

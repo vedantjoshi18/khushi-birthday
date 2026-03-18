@@ -110,6 +110,8 @@ export default function PlayerControls() {
     };
   }, []);
 
+  const repeatActive = playback.repeatState === "context" || playback.repeatState === "track";
+
   return (
     <div className="space-y-5">
       <div className="space-y-2">
@@ -140,22 +142,22 @@ export default function PlayerControls() {
       </div>
 
       <div className="flex items-center justify-center gap-4">
-        <button onClick={() => setShuffle(!playback.shuffle)} className={`rounded-full p-2 ${playback.shuffle ? "text-ink" : "text-stone-400"}`}>
+        <button onClick={() => void setShuffle(!playback.shuffle)} className={`rounded-full p-2 ${playback.shuffle ? "text-ink" : "text-stone-400"}`}>
           <Shuffle size={18} />
         </button>
-        <button onClick={previousTrack} className="rounded-full p-2 text-stone-700">
+        <button onClick={() => void previousTrack()} className="rounded-full p-2 text-stone-700">
           <SkipBack size={24} />
         </button>
         <button
-          onClick={togglePlay}
+          onClick={() => void togglePlay()}
           className="rounded-full bg-ink p-4 text-white shadow-[0_0_25px_rgba(0,0,0,.25)]"
         >
           {playback.isPlaying ? <Pause size={26} /> : <Play size={26} className="ml-0.5" />}
         </button>
-        <button onClick={nextTrack} className="rounded-full p-2 text-stone-700">
+        <button onClick={() => void nextTrack()} className="rounded-full p-2 text-stone-700">
           <SkipForward size={24} />
         </button>
-        <button onClick={cycleRepeat} className={`rounded-full p-2 ${playback.repeatState !== "off" ? "text-ink" : "text-stone-400"}`}>
+        <button onClick={() => void cycleRepeat()} className={`rounded-full p-2 ${repeatActive ? "text-ink" : "text-stone-400"}`}>
           <Repeat size={18} />
         </button>
       </div>
@@ -203,13 +205,13 @@ export default function PlayerControls() {
           <MonitorSmartphone size={14} /> Devices
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => loadDevices()} className="rounded-lg border border-stone-200 px-2 py-1 text-xs text-stone-600">
+          <button onClick={() => void loadDevices()} className="rounded-lg border border-stone-200 px-2 py-1 text-xs text-stone-600">
             Refresh
           </button>
           {devices.map((device) => (
             <button
               key={device.id}
-              onClick={() => transferPlayback(device.id)}
+              onClick={() => void transferPlayback(device.id)}
               className={`rounded-lg border px-2 py-1 text-xs ${
                 device.id === deviceId ? "border-ink text-ink font-semibold" : "border-stone-200 text-stone-600"
               }`}

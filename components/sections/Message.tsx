@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const letter = `You are the most beautiful part of my days. Every laugh, every tiny moment with you, every memory we made together is my favorite. Thank you for being my peace, my chaos, my best friend and my forever love. This little birthday page is just a glimpse of what I feel for you every single day.`;
+const letter = `Khushi, pehle toh I love you bahut zyada. Mai itna khush ho rha tha na yeh banate banate ki tu yeh dekhegi toh kya reaction degi, har moment yeh banate hue mujhe itni zyada khushi hui hai mai kya batau. I love you baby bahut zyada, tere aane ke baad meri zindagi itni achhi ho gayi hai ki mai shayad kabhi bata na paau kitni zyada. Tune mujhe aise zindagi jeena sikhaya jaise shayad hee kabhi jee pata mai. I LOVE YOU SO SO SO MUCH KYA BATAU MAI, HAPPY BIRTHDAY BABYYYYYYYYY. Khoob saara enjoy karna aur humesha haste rehna, aur jab bhi mushkile aaye yaad rakhna mai humesha tere saath hu, HUMESHA HEHE, I LOVE YOU BABYYYYY MUAAAH. `;
 
 export default function MessageSection() {
   const wordsRef = useRef<HTMLDivElement>(null);

@@ -103,7 +103,7 @@ export default function Navbar() {
               color: "var(--ink)",
             }}
           >
-            her birthday
+            khushi's 19th
           </a>
 
           <div className="hidden items-center gap-6 md:flex">{navItems}</div>

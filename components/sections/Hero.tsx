@@ -19,13 +19,15 @@ const BIRTHDAY_DATE = "2026-03-18T00:00:00";
 const TOTAL_DELTA = 1400;
 
 const photos = [
-  { file: "photo-1.jpg", label: "together \u2665",   stackRot:  2, fanX: -252, fanY:  -50, fanRot: -13 },
-  { file: "photo-2.jpg", label: "always smiling",    stackRot: -3, fanX:  210, fanY:  -88, fanRot:   8 },
-  { file: "photo-3.jpg", label: "my favorite",       stackRot:  5, fanX:  -82, fanY:   92, fanRot:  -4 },
+  { file: "photo-1.jpg", label: "always shining",   stackRot:  2, fanX: -252, fanY:  -50, fanRot: -13 },
+  { file: "photo-2.jpg", label: "daku mangal singh",    stackRot: -3, fanX:  210, fanY:  -88, fanRot:   8 },
+  { file: "photo-3.jpg", label: "PYARI",       stackRot:  5, fanX:  -82, fanY:   92, fanRot:  -4 },
   { file: "photo-4.jpg", label: "golden moments",    stackRot: -2, fanX:  254, fanY:   65, fanRot:  15 },
-  { file: "photo-5.jpg", label: "forever us",        stackRot:  7, fanX: -238, fanY:   74, fanRot: -10 },
+  { file: "photo-5.jpg", label: "u da real beauty",        stackRot:  7, fanX: -238, fanY:   74, fanRot: -10 },
   { file: "photo-6.jpg", label: "my world",          stackRot: -4, fanX:   50, fanY: -130, fanRot:  19 },
 ];
+
+const slideshowPhotos = photos.filter((photo) => photo.file !== "photo-3.jpg");
 
 const FAN_WINDOWS = [
   [0,    0.22],
@@ -147,6 +149,15 @@ export default function Hero() {
   const doneRef     = useRef(false);
   const touchYRef   = useRef(0);
   const [fanDone, setFanDone] = useState(false);
+  const [bgIndex, setBgIndex] = useState(0);
+
+  useEffect(() => {
+    if (slideshowPhotos.length <= 1) return;
+    const timer = globalThis.setInterval(() => {
+      setBgIndex((value) => (value + 1) % slideshowPhotos.length);
+    }, 4300);
+    return () => globalThis.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     // Lock the page
@@ -217,6 +228,34 @@ export default function Hero() {
     <>
       <section id="home" style={{ height: "100vh" }}>
         <div className="relative flex h-screen flex-col">
+
+          {/* ── Background slideshow ── */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {slideshowPhotos.map((photo, idx) => (
+              <motion.div
+                key={photo.file}
+                initial={false}
+                animate={{ opacity: idx === bgIndex ? 1 : 0 }}
+                transition={{ duration: 1.35, ease: "easeInOut" }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={`/photos/${photo.file}`}
+                  alt={photo.label}
+                  fill
+                  priority={idx === 0}
+                  unoptimized
+                  sizes="100vw"
+                  className="object-cover"
+                  draggable={false}
+                />
+              </motion.div>
+            ))}
+
+            {/* Soft translucent veil for readability */}
+            <div className="absolute inset-0 bg-white/30" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_12%,rgba(255,255,255,0.42),transparent_56%),radial-gradient(circle_at_85%_78%,rgba(255,255,255,0.25),transparent_52%)]" />
+          </div>
 
           {/* ── Headline ── */}
           <motion.header

@@ -9,7 +9,7 @@ export default function CallbackPage() {
   useEffect(() => {
     const run = async () => {
       const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || "";
-      const params = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams(globalThis.window.location.search);
       const code = params.get("code");
       const error = params.get("error");
 
@@ -25,7 +25,7 @@ export default function CallbackPage() {
 
       try {
         await exchangeCodeForToken(clientId, code, resolveSpotifyRedirectUri());
-        window.location.href = "/#music";
+        globalThis.window.location.href = "/#music";
       } catch (err) {
         const reason = err instanceof Error ? err.message : "Unknown error";
         setMessage(`Spotify connection failed: ${reason}`);

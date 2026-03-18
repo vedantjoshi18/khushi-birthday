@@ -10,7 +10,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { clearStoredToken, getStoredToken, resolveSpotifyRedirectUri, startSpotifyLogin } from "./auth";
+import {
+  clearStoredToken,
+  getStoredToken,
+  refreshSpotifyToken,
+  resolveSpotifyRedirectUri,
+  startSpotifyLogin,
+} from "./auth";
 
 declare global {
   interface Window {
@@ -122,7 +128,26 @@ function uniqueTracks(items: Track[]) {
   return result;
 }
 
-export default function SpotifyProvider({ children }: { children: ReactNode }) {
+function repeatStateFromMode(repeatMode: number): PlaybackState["repeatState"] {
+  if (repeatMode === 2) return "track";
+  if (repeatMode === 1) return "context";
+  return "off";
+}
+
+function trackFromPlayerState(currentTrack: any): Track | null {
+  if (!currentTrack) return null;
+
+  return {
+    id: currentTrack.id,
+    name: currentTrack.name,
+    uri: currentTrack.uri,
+    durationMs: currentTrack.duration_ms,
+    album: currentTrack.album,
+    artists: currentTrack.artists,
+  };
+}
+
+export default function SpotifyProvider({ children }: Readonly<{ children: ReactNode }>) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sdkReady, setSdkReady] = useState(false);
@@ -132,33 +157,90 @@ export default function SpotifyProvider({ children }: { children: ReactNode }) {
   const [devices, setDevices] = useState<Device[]>([]);
   const [queue, setQueue] = useState<Track[]>([]);
   const [deviceId, setDeviceId] = useState<string | null>(null);
-  const [player, setPlayer] = useState<SpotifyPlayer | null>(null);
   const searchAbortRef = useRef<AbortController | null>(null);
   const syncTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
+  const refreshPromiseRef = useRef<Promise<string | null> | null>(null);
+  const playerRef = useRef<SpotifyPlayer | null>(null);
+  const tokenRef = useRef<string | null>(null);
 
   const clientId = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || "";
 
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
+
+  const refreshAccessToken = useCallback(async () => {
+    if (!clientId) return null;
+
+    if (refreshPromiseRef.current) {
+      return refreshPromiseRef.current;
+    }
+
+    const stored = getStoredToken();
+    if (!stored?.refreshToken) {
+      clearStoredToken();
+      setToken(null);
+      return null;
+    }
+
+    refreshPromiseRef.current = refreshSpotifyToken(clientId, stored.refreshToken)
+      .then((nextToken) => {
+        setToken(nextToken.accessToken);
+        return nextToken.accessToken;
+      })
+      .catch(() => {
+        clearStoredToken();
+        setToken(null);
+        return null;
+      })
+      .finally(() => {
+        refreshPromiseRef.current = null;
+      });
+
+    return refreshPromiseRef.current;
+  }, [clientId]);
+
   const api = useCallback(
     async (path: string, init?: RequestInit) => {
-      if (!token) throw new Error("Spotify not connected");
-      const response = await fetch(`${SPOTIFY_API}${path}`, {
-        ...init,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          ...(init?.headers ?? {}),
-        },
-      });
-      if (response.status === 204) return null;
-      const data = await response.json().catch(() => null);
+      if (!tokenRef.current) throw new Error("Spotify not connected");
+
+      const runRequest = async (accessToken: string) => {
+        const headers = new Headers(init?.headers);
+        headers.set("Authorization", `Bearer ${accessToken}`);
+        if (init?.body && !headers.has("Content-Type")) {
+          headers.set("Content-Type", "application/json");
+        }
+
+        const response = await fetch(`${SPOTIFY_API}${path}`, {
+          ...init,
+          headers,
+        });
+
+        if (response.status === 204) {
+          return { response, data: null };
+        }
+
+        const data = await response.json().catch(() => null);
+        return { response, data };
+      };
+
+      let { response, data } = await runRequest(tokenRef.current);
+
+      if (response.status === 401) {
+        const nextToken = await refreshAccessToken();
+        if (!nextToken) return null;
+        ({ response, data } = await runRequest(nextToken));
+      }
+
       if (!response.ok) {
         const errorMessage = data?.error?.message || "Spotify API error";
         console.error(`Spotify API error on ${path}: ${errorMessage}`);
         return null;
       }
+
       return data;
     },
-    [token]
+    [refreshAccessToken]
   );
 
   const withDevice = useCallback(
@@ -228,60 +310,61 @@ export default function SpotifyProvider({ children }: { children: ReactNode }) {
   }, [clientId]);
 
   const disconnect = useCallback(() => {
-    player?.disconnect();
+    playerRef.current?.disconnect();
+    playerRef.current = null;
     clearStoredToken();
     setToken(null);
+    setSdkReady(false);
+    setDeviceId(null);
     setPlayback(initialPlayback);
     setSearchResults([]);
     setRecentlyPlayed([]);
     setQueue([]);
-  }, [player]);
+    setDevices([]);
+  }, []);
 
   useEffect(() => {
     const stored = getStoredToken();
-    if (stored?.accessToken) setToken(stored.accessToken);
+    if (!stored?.accessToken) {
+      setLoading(false);
+      return;
+    }
+
+    if (Date.now() >= stored.expiresAt - 60_000 && stored.refreshToken && clientId) {
+      refreshAccessToken().finally(() => setLoading(false));
+      return;
+    }
+
+    setToken(stored.accessToken);
     setLoading(false);
-  }, []);
+  }, [clientId, refreshAccessToken]);
 
   useEffect(() => {
     if (!token) return;
 
-    const script = document.createElement("script");
-    script.src = "https://sdk.scdn.co/spotify-player.js";
-    script.async = true;
-    document.body.appendChild(script);
+    const initializePlayer = () => {
+      if (!globalThis.window.Spotify || playerRef.current) return;
 
-    globalThis.window.onSpotifyWebPlaybackSDKReady = () => {
-      if (!globalThis.window.Spotify) return;
       const instance = new globalThis.window.Spotify.Player({
         name: "Khushi Birthday Player",
-        getOAuthToken: (callback) => callback(token),
+        getOAuthToken: (callback) => callback(tokenRef.current || ""),
         volume: 0.7,
       });
 
-      instance.addListener("ready", ({ device_id }: { device_id: string }) => {
+      const handleReady = ({ device_id }: { device_id: string }) => {
         setSdkReady(true);
         setDeviceId(device_id);
-        transferPlayback(device_id).catch(() => null);
-      });
+        void transferPlayback(device_id);
+      };
 
-      instance.addListener("player_state_changed", (state: any) => {
+      const handleNotReady = () => {
+        setSdkReady(false);
+      };
+
+      const handlePlayerStateChanged = (state: any) => {
         if (!state) return;
 
-        const currentTrack = state.track_window?.current_track;
-        const track: Track | null = currentTrack
-          ? {
-              id: currentTrack.id,
-              name: currentTrack.name,
-              uri: currentTrack.uri,
-              durationMs: currentTrack.duration_ms,
-              album: currentTrack.album,
-              artists: currentTrack.artists,
-            }
-          : null;
-
-        const repeatState: PlaybackState["repeatState"] =
-          state.repeat_mode === 2 ? "track" : state.repeat_mode === 1 ? "context" : "off";
+        const track = trackFromPlayerState(state.track_window?.current_track);
 
         setPlayback({
           isPlaying: !state.paused,
@@ -289,16 +372,35 @@ export default function SpotifyProvider({ children }: { children: ReactNode }) {
           durationMs: state.duration || track?.durationMs || 0,
           track,
           shuffle: Boolean(state.shuffle),
-          repeatState,
+          repeatState: repeatStateFromMode(state.repeat_mode),
         });
-      });
+      };
 
-      instance.connect();
-      setPlayer(instance);
+      instance.addListener("ready", handleReady);
+      instance.addListener("not_ready", handleNotReady);
+      instance.addListener("player_state_changed", handlePlayerStateChanged);
+
+      playerRef.current = instance;
+      void instance.connect();
     };
 
+    if (globalThis.window.Spotify) {
+      initializePlayer();
+      return;
+    }
+
+    const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://sdk.scdn.co/spotify-player.js"]');
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.src = "https://sdk.scdn.co/spotify-player.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+
+    globalThis.window.onSpotifyWebPlaybackSDKReady = initializePlayer;
+
     return () => {
-      script.remove();
+      globalThis.window.onSpotifyWebPlaybackSDKReady = undefined;
     };
   }, [token, transferPlayback]);
 
@@ -353,9 +455,21 @@ export default function SpotifyProvider({ children }: { children: ReactNode }) {
       const controller = new AbortController();
       searchAbortRef.current = controller;
 
-      const data = await api(`/search?type=track&limit=10&q=${encodeURIComponent(query)}`, {
-        signal: controller.signal,
-      });
+      let data: any;
+      try {
+        data = await api(`/search?type=track&limit=10&q=${encodeURIComponent(query)}`, {
+          signal: controller.signal,
+        });
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+        setSearchResults([]);
+        return;
+      }
+
+      if (controller.signal.aborted) return;
+
       if (!data?.tracks?.items) {
         setSearchResults([]);
         return;
@@ -368,7 +482,7 @@ export default function SpotifyProvider({ children }: { children: ReactNode }) {
   const playTrack = useCallback(
     async (uri: string) => {
       setPlayback((value) => ({ ...value, isPlaying: true, progressMs: 0 }));
-      window.dispatchEvent(new CustomEvent("teddy:music"));
+      globalThis.dispatchEvent(new CustomEvent("teddy:music"));
       await api(withDevice("/me/player/play"), { method: "PUT", body: JSON.stringify({ uris: [uri] }) });
       syncPlaybackSoon();
     },
@@ -396,8 +510,8 @@ export default function SpotifyProvider({ children }: { children: ReactNode }) {
     const nextPlaying = !playback.isPlaying;
     setPlayback((value) => ({ ...value, isPlaying: nextPlaying }));
 
-    if (player) {
-      await player.togglePlay();
+    if (playerRef.current) {
+      await playerRef.current.togglePlay();
       syncPlaybackSoon();
       return;
     }
@@ -408,7 +522,7 @@ export default function SpotifyProvider({ children }: { children: ReactNode }) {
       await api(withDevice("/me/player/play"), { method: "PUT" });
     }
     syncPlaybackSoon();
-  }, [api, playback.isPlaying, player, syncPlaybackSoon, withDevice]);
+  }, [api, playback.isPlaying, syncPlaybackSoon, withDevice]);
 
   const nextTrack = useCallback(async () => {
     const handledByLocalQueue = await playNextFromLocalQueue();
@@ -452,7 +566,12 @@ export default function SpotifyProvider({ children }: { children: ReactNode }) {
   );
 
   const cycleRepeat = useCallback(async () => {
-    const next = playback.repeatState === "off" ? "context" : playback.repeatState === "context" ? "track" : "off";
+    let next: PlaybackState["repeatState"] = "off";
+    if (playback.repeatState === "off") {
+      next = "context";
+    } else if (playback.repeatState === "context") {
+      next = "track";
+    }
     setPlayback((value) => ({ ...value, repeatState: next }));
     await api(withDevice(`/me/player/repeat?state=${next}`), { method: "PUT" });
     syncPlaybackSoon();

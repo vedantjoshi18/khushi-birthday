@@ -9,10 +9,14 @@ export type StoredToken = {
   refreshToken?: string;
 };
 
+function persistStoredToken(token: StoredToken) {
+  localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+}
+
 export function resolveSpotifyRedirectUri() {
   const configured = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URI?.trim();
   if (configured) return configured;
-  if (typeof window !== "undefined") return `${window.location.origin}/callback`;
+  if (globalThis.window !== undefined) return `${globalThis.window.location.origin}/callback`;
   return "http://localhost:3000/callback";
 }
 
@@ -28,10 +32,10 @@ function randomString(length: number) {
 async function challengeFromVerifier(verifier: string) {
   const data = new TextEncoder().encode(verifier);
   const digest = await crypto.subtle.digest("SHA-256", data);
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+  return btoa(String.fromCodePoint(...new Uint8Array(digest)))
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
 }
 
 export async function startSpotifyLogin(clientId: string, redirectUri: string) {
@@ -49,7 +53,7 @@ export async function startSpotifyLogin(clientId: string, redirectUri: string) {
     code_challenge: challenge,
   });
 
-  window.location.href = `${SPOTIFY_AUTH}?${params.toString()}`;
+  globalThis.window.location.href = `${SPOTIFY_AUTH}?${params.toString()}`;
 }
 
 export async function exchangeCodeForToken(clientId: string, code: string, redirectUri: string) {
@@ -82,8 +86,37 @@ export async function exchangeCodeForToken(clientId: string, code: string, redir
     refreshToken: data.refresh_token,
   };
 
-  localStorage.setItem(TOKEN_KEY, JSON.stringify(token));
+  persistStoredToken(token);
   localStorage.removeItem(VERIFIER_KEY);
+  return token;
+}
+
+export async function refreshSpotifyToken(clientId: string, refreshToken: string) {
+  const body = new URLSearchParams({
+    client_id: clientId,
+    grant_type: "refresh_token",
+    refresh_token: refreshToken,
+  });
+
+  const response = await fetch(SPOTIFY_TOKEN, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.access_token) {
+    throw new Error(data.error_description || "Spotify token refresh failed");
+  }
+
+  const token: StoredToken = {
+    accessToken: data.access_token,
+    expiresAt: Date.now() + data.expires_in * 1000,
+    refreshToken: data.refresh_token || refreshToken,
+  };
+
+  persistStoredToken(token);
   return token;
 }
 
@@ -91,12 +124,7 @@ export function getStoredToken() {
   try {
     const raw = localStorage.getItem(TOKEN_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredToken;
-    if (Date.now() > parsed.expiresAt) {
-      localStorage.removeItem(TOKEN_KEY);
-      return null;
-    }
-    return parsed;
+    return JSON.parse(raw) as StoredToken;
   } catch {
     return null;
   }

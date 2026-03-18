@@ -7,22 +7,23 @@ type Props = {
   onSearch: (query: string) => Promise<void>;
 };
 
-export default function SearchBar({ onSearch }: Props) {
+export default function SearchBar({ onSearch }: Readonly<Props>) {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      onSearch(query).catch(() => null);
+    const trimmed = query.trim();
+    const timer = globalThis.setTimeout(() => {
+      onSearch(trimmed).catch(() => null);
     }, 250);
 
-    return () => window.clearTimeout(timer);
+    return () => globalThis.clearTimeout(timer);
   }, [onSearch, query]);
 
   return (
     <form
       onSubmit={async (event) => {
         event.preventDefault();
-        await onSearch(query);
+        await onSearch(query.trim());
       }}
       className="flex items-center gap-2 rounded-2xl border border-stone-200 bg-white/80 p-2"
     >

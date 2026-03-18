@@ -91,9 +91,6 @@ function FlowerTooltip({ flower }: Readonly<{ flower: Flower }>) {
         {flower.name.toUpperCase()}
       </p>
       <p style={{ fontSize: "12px", color: "#333" }}>{flower.meaning}</p>
-      <p style={{ fontSize: "12px", color: "#333" }}>
-        Birth Month: {flower.birthMonth}
-      </p>
     </motion.div>
   );
 }
@@ -264,13 +261,13 @@ export default function BouquetBuilder() {
             className="italic text-sm"
             style={{ fontFamily: "var(--font-garamond),Georgia,serif", color: "var(--muted)" }}
           >
-            a gift from me to you
+            I LOVE YOU MUAAAH
           </p>
           <h2
             className="mt-2 font-playfair leading-tight"
             style={{ fontSize: "clamp(2rem,6vw,3.8rem)", color: "var(--ink)" }}
           >
-            build her bouquet
+            dher saare bouquet meri taraf se
           </h2>
           <p
             style={{
@@ -585,7 +582,7 @@ export default function BouquetBuilder() {
                   className="font-playfair"
                   style={{ fontSize: "clamp(1.2rem,4vw,1.7rem)", color: "var(--ink)" }}
                 >
-                  for you, with love 🤍
+                  abhi online design kar rhi hai, aage jaake offline karegi🤍
                 </p>
                 <p
                   className="mt-2 italic"
